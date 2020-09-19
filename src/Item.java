@@ -58,6 +58,10 @@ public class Item {
         return name;
     }
 
+    public String getMass() {
+        return mass;
+    }
+
     public Key getKey() {
         return key;
     }
@@ -90,7 +94,7 @@ public class Item {
 
     @Override
     public String toString() {
-        return this.name + "; mass: " + this.mass + "; price: " + this.price + "; toxicity: " +
+        return "Name: " + this.name + "; mass: " + this.mass + "; price: " + this.price + "; toxicity: " +
                 (this.toxicity ? "Yes" : "No") + "; explosive: " + (this.explosive ? "Yes" : "No") +
                 "; available: " + (this.count - this.reserved);
     }
@@ -159,7 +163,7 @@ public class Item {
                 return this.name.compareTo(key.name);
             }
 
-            throw new NullPointerException();
+            return -1;
          }
 
         @Override

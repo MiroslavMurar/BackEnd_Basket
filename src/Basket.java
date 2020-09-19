@@ -10,6 +10,10 @@ public class Basket {
         this.customer = customer;
     }
 
+    public Map<Item, Integer> getAmounts() {
+        return Collections.unmodifiableMap(amounts);
+    }
+
     public String getCustomer() {
         return customer;
     }
@@ -47,6 +51,7 @@ public class Basket {
                 } else {
                     items.remove(item.getKey());
                     amounts.remove(item);
+                    return true;
                 }
             }
         }
@@ -55,15 +60,25 @@ public class Basket {
 
     public void makeOrder() {
         for (Map.Entry<Item, Integer> item : amounts.entrySet()) {
-            item.getKey().confirmOrder(item.getValue());
             System.out.println(item.getKey().getName() + " has been order in " + item.getValue() + " quantity");
         }
+        clear();
     }
 
     public void showBasket() {
         System.out.println("Basket:");
-        for (Map.Entry<Item.Key, Item> itemEntry : items.entrySet()) {
-            System.out.println("\t" + itemEntry.getValue());
+        int count = 0;
+        for (Map.Entry<Item, Integer> itemEntry : amounts.entrySet()) {
+            count++;
+            System.out.println("\t" + count + ". " + itemEntry.getKey().getName() + " : " + itemEntry.getKey().getMass() + " : " + itemEntry.getValue());
         }
+    }
+
+    public void clear() {
+        for (Map.Entry<Item, Integer> item : amounts.entrySet()) {
+            item.getKey().confirmOrder(item.getValue());
+        }
+        items.clear();
+        amounts.clear();
     }
 }
