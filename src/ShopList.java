@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class ShopList {
+public class ShopList implements ShopElements {
 
     public static Map<Item.Key, Item> items = new TreeMap<>();
 
@@ -14,13 +14,12 @@ public class ShopList {
         Item item7 = new Item("pyridine", "1000 grams", 446.9, true, false, 17);
         Item item8 = new Item("acetophenone", "1 liter", 4.10, false, false, 23);
         Item item9 = new Item("acetophenone", "10 liter", 30.9, false, false, 19);
-        Item item10 = new Item("acetophenone", "50 liter", 135, false, false, 15);
-        Item item11 = new Item("acetophenone", "100 liter", 210, false, false, 9);
-        Item item12 = new Item("4-methylacetophenone", "100 milliliters", 8.56, false, false, 8);
-        Item item13 = new Item("4-methylacetophenone", "1 liter", 77.8, false, false, 8);
-        Item item14 = new Item("4-methylacetophenone", "10 liter", 420, false, false, 8);
-        Item item15 = new Item("4-methylacetophenone", "50 liter", 980, false, false, 8);
-        Item item16 = new Item("4-methylacetophenone", "100 liter", 1600, false, false, 8);
+        Item item10 = new Item("acetophenone", "100 liter", 135, false, false, 15);
+        Item item11 = new Item("acetophenone", "1000 liter", 210, false, false, 9);
+        Item item12 = new Item("4-methylacetophenone", "1 liter", 77.8, false, false, 8);
+        Item item13 = new Item("4-methylacetophenone", "10 liter", 420, false, false, 8);
+        Item item14 = new Item("4-methylacetophenone", "100 liter", 980, false, false, 8);
+        Item item15 = new Item("4-methylacetophenone", "1000 liter", 1600, false, false, 8);
 
         items.put(item1.getKey(), item1);
         items.put(item2.getKey(), item2);
@@ -37,7 +36,6 @@ public class ShopList {
         items.put(item13.getKey(), item13);
         items.put(item14.getKey(), item14);
         items.put(item15.getKey(), item15);
-        items.put(item16.getKey(), item16);
     }
 
     public boolean addItem(Item item) {
@@ -77,11 +75,13 @@ public class ShopList {
         }
     }
 
+    @Override
     public Map<Item.Key, Item> getItems() {
         return Collections.unmodifiableMap(items);
     }
 
-    public String getShopList() {
+    @Override
+    public String getList() {
         StringBuilder str = new StringBuilder("ShopList: \n");
         int count = 1;
         for (Map.Entry<Item.Key, Item> entry : items.entrySet()) {
@@ -90,5 +90,4 @@ public class ShopList {
         }
         return str.toString();
     }
-
 }

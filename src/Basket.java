@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Basket {
+public class Basket implements ShopElements {
 
     private String customer;
     private Map<Item.Key, Item> items = new TreeMap<>();
@@ -10,59 +10,62 @@ public class Basket {
         this.customer = customer;
     }
 
-    public Map<Item, Integer> getAmounts() {
-        return Collections.unmodifiableMap(amounts);
-    }
-
     public String getCustomer() {
         return customer;
     }
 
-    public boolean reserveItem(Item item, int count) {
-        if (items.containsKey(item.getKey())) {
-            Item itemInBasket = items.get(item.getKey());
-            int reserved = itemInBasket.reserve(count);
-            if (reserved > 0) {
+    public int reserveItem(Item item, int count) {
+        int reserved = item.reserve(count);
+        if (reserved > 0) {
+            if (items.containsKey(item.getKey())) {
                 amounts.put(item, amounts.get(item) + reserved);
-                return true;
+                return reserved;
+            } else {
+                items.put(item.getKey(), item);
+                amounts.put(item, reserved);
+                return reserved;
             }
-            return false;
         }
-        if (item.reserve(count) > 0) {
-            items.put(item.getKey(), item);
-            amounts.put(item, count);
-            return true;
-        }
-        return false;
+        return -1;
     }
 
-    public boolean unreserveItem(Item item, int count) {
-        if (items.containsKey(item.getKey())) {
+    public int unreserveItem(Item item, int count) {
+        if (items.containsKey(item.getKey()) && count > 0) {
             if (amounts.get(item) < count) {
                 count = amounts.get(item);
             }
             Item itemInBasket = items.get(item.getKey());
-            int amount = itemInBasket.unreserve(count);
-            if (amount > 0) {
-                int actuallAmount = amounts.get(item);
-                if (actuallAmount > amount) {
-                    amounts.put(item, actuallAmount - amount);
-                    return true;
-                } else {
+            int unreserved = itemInBasket.unreserve(count);
+            if (unreserved > 0) {
+                amounts.put(item, amounts.get(item) - unreserved);
+                if (amounts.get(item) == 0) {
                     items.remove(item.getKey());
                     amounts.remove(item);
-                    return true;
                 }
+                return unreserved;
             }
         }
-        return false;
+        System.out.println("Can not remove non-exiting or zero point items");
+        return -1;
     }
 
     public void makeOrder() {
         for (Map.Entry<Item, Integer> item : amounts.entrySet()) {
             System.out.println(item.getKey().getName() + " has been order in " + item.getValue() + " quantity");
+            item.getKey().confirmOrder(item.getValue());
         }
-        clear();
+        amounts.clear();
+        items.clear();
+    }
+
+    public void clear() {
+        if (!amounts.isEmpty()) {
+            for (Map.Entry<Item, Integer> item : amounts.entrySet()) {
+                item.getKey().unreserve(item.getValue());
+            }
+        }
+        items.clear();
+        amounts.clear();
     }
 
     public void showBasket() {
@@ -74,11 +77,23 @@ public class Basket {
         }
     }
 
-    public void clear() {
-        for (Map.Entry<Item, Integer> item : amounts.entrySet()) {
-            item.getKey().confirmOrder(item.getValue());
+    public Map<Item, Integer> getAmounts() {
+        return amounts;
+    }
+
+    @Override
+    public Map<Item.Key, Item> getItems() {
+        return items;
+    }
+
+    @Override
+    public String getList() {
+        StringBuilder str = new StringBuilder("Basket: \n");
+        int count = 1;
+        for (Map.Entry<Item.Key, Item> entry : items.entrySet()) {
+            str.append("\t").append(count).append(". ").append(entry.getValue()).append("\n");
+            count++;
         }
-        items.clear();
-        amounts.clear();
+        return str.toString();
     }
 }

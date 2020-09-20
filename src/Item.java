@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 
 public class Item {
 
@@ -23,7 +22,7 @@ public class Item {
 
     public int reserve(int count) {
         if (count > 0) {
-            if(this.count >= this.reserved + count) {
+            if (this.count >= this.reserved + count) {
                 this.reserved += count;
                 return count;
             } else {
@@ -130,8 +129,7 @@ public class Item {
 
         @Override
         public int hashCode() {
-            return this.name.hashCode() + this.mass.hashCode() + ((int) price)  + 101;
-
+            return this.name.hashCode() + this.mass.hashCode() + ((int) price) + 101;
         }
 
         @Override
@@ -139,17 +137,14 @@ public class Item {
             if (obj == this) {
                 return true;
             }
-
             if (obj == null || !obj.getClass().equals(this.getClass())) {
                 return false;
             }
-
             if (this.name.equals(((Key) obj).getName())) {
                 if (this.mass.equals(((Key) obj).getMass())) {
                     return this.price == ((Key) obj).getPrice();
                 }
             }
-
             return false;
         }
 
@@ -160,15 +155,23 @@ public class Item {
             }
 
             if (key != null) {
-                return this.name.compareTo(key.name);
-            }
+                if (this.name.compareTo(key.getName()) == 0) {
+                    if (this.mass.compareTo(key.mass) == 0) {
+                        return (this.price + "").compareTo("" + key.getPrice());
+                    } else {
+                        return this.mass.compareTo(key.mass);
+                    }
+                }
+                return this.name.compareTo(key.getName());
 
+            }
             return -1;
-         }
+        }
 
         @Override
         public String toString() {
-            return "" + this.name.hashCode() + this.mass.hashCode() + ((int) price)  + 101;
+            return "" + this.name.hashCode() + this.mass.hashCode() + ((int) price) + 101;
         }
     }
 }
+

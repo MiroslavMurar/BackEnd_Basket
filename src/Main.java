@@ -20,37 +20,52 @@ public class Main {
         printMenu();
         boolean isTrue = true;
         while (isTrue) {
-            int option = scanner.nextInt();
-            switch (option) {
-                case 0:
-                    cancelOrder();
-                    isTrue = false;
-                    break ;
-                case 1:
-                    shopList.printShopList();
-                    break;
-                case 2:
-                    addToBasket();
-                    break;
-                case 3:
-                    removeFromBasket();
-                    break;
-                case 4:
-                    updateBasket();
-                    break;
-                case 5:
-                    basket.makeOrder();
-                    isTrue=false;
-                    break;
-                case 6:
-                    basket.showBasket();
-                    break;
-                case 7:
-                    printMenu();
-                    break;
+            try {
+                int option = scanner.nextInt();
+                switch (option) {
+                    case 0:
+                        cancelOrder();
+                        isTrue = false;
+                        break;
+                    case 1:
+                        shopList.printShopList();
+                        optionMenu();
+                        break;
+                    case 2:
+                        addToBasket();
+                        optionMenu();
+                        break;
+                    case 3:
+                        removeFromBasket();
+                        optionMenu();
+                        break;
+                    case 4:
+                        updateBasket();
+                        optionMenu();
+                        break;
+                    case 5:
+                        basket.makeOrder();
+                        isTrue = false;
+                        break;
+                    case 6:
+                        basket.showBasket();
+                        optionMenu();
+                        break;
+                    case 7:
+                        printMenu();
+                        break;
+                }
+            } catch (Exception e) {
+                System.out.println("You probably did mistake please insert just integer");
+                scanner.nextLine();
             }
+
         }
         System.out.println("Good bey");
+    }
+
+    private static void optionMenu() {
+        System.out.println("Press 7 for option menu");
     }
 
     private static void printMenu() {
@@ -66,31 +81,62 @@ public class Main {
         );
     }
 
+    private static void addToBasket() {
+        System.out.println("Hello " + basket.getCustomer() + " we have these compounds for you ");
+        shopList.printShopList();
+        System.out.println("\nWhich one would you like to order or 0 for exit ? (Enter a number) ");
+        Item item = getItem(shopList);
+        if (item != null) {
+            int count;
+            while (true) {
+                System.out.println("How many would you like to order ? (Enter a number) ");
+                count = getCount();
+                int reserved = basket.reserveItem(item, count);
+                if (reserved > 0) {
+                    System.out.println("Successfully ordered: " + item.getName() + " in " + reserved + " amount");
+                    return;
+                } else {
+                    if (count == 0) {
+                        break;
+                    }
+                    System.out.println("Not possible use negative amount\nEnter correct number or 0 for cancel");
+                }
+            }
+        } else {
+            System.out.println("Exiting from section buy chemicals ");
+        }
+    }
+
     private static void updateBasket() {
         if (basket.getAmounts().isEmpty()) {
             System.out.println("Basket is empty");
             return;
         }
         basket.showBasket();
-        System.out.println("\nWhich one would you like to update ? (Enter a number) ");
-        int option = getIdOfItem();
-        String[] idArray = getKey(option);
-        Item.Key key = Item.createKey(idArray[0], idArray[1], Double.parseDouble(idArray[2]));
-        Item item = shopList.getItems().get(key);
-        int count;
-        while (true) {
-            System.out.println("Change amount of your item (Enter a number) ");
-            count = getCount();
-            if (basket.unreserveItem(item, basket.getAmounts().get(item))) {
-                if (basket.reserveItem(item, count)) {
-                    System.out.println("Successfully changed: " + item.getName() + " in " + count + " amount");
-                    System.out.println("Press 7 for menu option or 0 for EXIT");
+        System.out.println("\nWhich one would you like to update or 0 for exit ? (Enter a number) ");
+        Item item = getItem(basket);
+        if (item != null) {
+            int count;
+            while (true) {
+                System.out.println("Change current amount of your item to the new amount, zero for exit (Enter a number) ");
+                count = getCount();
+                int originalAmount = basket.getAmounts().get(item);
+                basket.unreserveItem(item, basket.getAmounts().get(item));
+                int reserved = basket.reserveItem(item, count);
+                if (reserved > 0) {
+                    System.out.println("Successfully changed: " + item.getName() + " in " + reserved + " amount");
                     return;
+                } else {
+                    if (count == 0) {
+                        basket.reserveItem(item, originalAmount);
+                        break;
+                    }
+                    System.out.println("Not possible use negative amount\nPleasy try again");
                 }
-            } else {
-                System.out.println("You enter bigger amount than you have already orderred, pleasy try again");
-                continue;
+                basket.reserveItem(item, originalAmount);
             }
+        } else {
+            System.out.println("Exiting from section buy chemicals ");
         }
     }
 
@@ -100,53 +146,64 @@ public class Main {
             return;
         }
         basket.showBasket();
-        System.out.println("\nWhich one would you like to remove ? (Enter a number) ");
-        int option = getIdOfItem();
-        String[] idArray = getKey(option);
-        Item.Key key = Item.createKey(idArray[0], idArray[1], Double.parseDouble(idArray[2]));
-        Item item = shopList.getItems().get(key);
-        int count;
+        System.out.println("\nWhich one would you like to remove or 0 for exit ? (Enter a number) ");
+        Item item = getItem(basket);
+        if (item != null) {
+            basket.unreserveItem(item, basket.getAmounts().get(item));
+            basket.getAmounts().remove(item);
+            basket.getItems().remove(item.getKey());
+        }
+    }
+
+    private static Item getItem(ShopElements element) {
         while (true) {
-            System.out.println("How many would you like to remove from basket ? (Enter a number) ");
-            count = getCount();
-            if (basket.unreserveItem(item, count)) {
-                System.out.println("Successfully unreserved: " + item.getName() + " in " + count + " amount");
-                System.out.println("Press 7 for menu option or 0 for EXIT");
-                return;
-            } else {
-                System.out.println("You enter bigger amount than you have already orderred, pleasy try again");
+            int option = getIdOfItem();
+            if (option == 0) {
+                return null;
+            }
+            String[] idArray = getKey(option, element);
+            if (idArray[0] == null && idArray[1] == null && idArray[2] == null) {
+                System.out.println("Compound does not exit please enter correct number");
+                continue;
+            }
+            Item.Key key = Item.createKey(idArray[0], idArray[1], Double.parseDouble(idArray[2]));
+            return element.getItems().get(key);
+        }
+    }
+
+    private static int getIdOfItem() {
+        while (true) {
+            try {
+                return scanner.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("Must insert integer of compound");
+                scanner.nextLine();
             }
         }
     }
 
-    private static void addToBasket() {
-        System.out.println("Hello " + basket.getCustomer() + " we have these compounds for you ");
-        shopList.printShopList();
-        System.out.println("\nWhich one would you like to order ? (Enter a number) ");
-        int option = getIdOfItem();
-        String[] idArray = getKey(option);
-        Item.Key key = Item.createKey(idArray[0], idArray[1], Double.parseDouble(idArray[2]));
-        Item item = shopList.getItems().get(key);
-        int count;
+    private static int getCount() {
         while (true) {
-            System.out.println("How many would you like to order ? (Enter a number) ");
-            count = getCount();
-            if (basket.reserveItem(item, count)) {
-                System.out.println("Successfully orderred: " + item.getName() + " in " + count + " amount");
-                System.out.println("Press 7 for menu option or 0 for EXIT");
-                return;
-            } else {
-                System.out.println("Not available amount");
+            try {
+                int number = scanner.nextInt();
+                if (number < 0) {
+                    System.out.println("Can not use negative number");
+                    continue;
+                }
+                return number;
+            } catch (InputMismatchException e) {
+                System.out.println("Must insert integer of compound");
+                scanner.nextLine();
             }
         }
     }
 
-    private static String[] getKey(int option) {
-        String choice = "(" + option + ". )";
-        String shopListString = shopList.getShopList();
+    private static String[] getKey(int option, ShopElements element) {
+        String choice = "(\t" + option + ". )";
+        String shopListString = element.getList();
         String[] idArray = new String[3];
         String line;
-        String id = "(.+?)(\n)";
+        String id = "(.+?)(\\n)";
         Pattern pattern = Pattern.compile(choice + id);
         Matcher matcher = pattern.matcher(shopListString);
         if (matcher.find()) {
@@ -175,30 +232,6 @@ public class Main {
             }
         }
         return idArray;
-    }
-
-    private static int getIdOfItem() {
-        while (true) {
-            try {
-                int option = scanner.nextInt();
-                return option;
-            } catch (InputMismatchException e) {
-                System.out.println("Must insert integer of compound");
-                scanner.nextLine();
-            }
-        }
-    }
-
-    private static int getCount() {
-        while (true) {
-            try {
-                int option = scanner.nextInt();
-                return option;
-            } catch (InputMismatchException e) {
-                System.out.println("Must insert integer of compound");
-                scanner.nextLine();
-            }
-        }
     }
 
     private static void cancelOrder() {
